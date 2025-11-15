@@ -1,0 +1,429 @@
+# Conversational Support Prototype — Scenario Scripts
+
+This file contains full scripted conversation scenarios for showcasing the conversational support assistant, including KB flows, similar ticket flows, escalation to ticket creation, AAL flows, and IT Support interactions.
+
+---
+
+# ✅ Scenario 1 — Standard Issue With KB Solution Found
+
+**User:**  
+Hi, I can’t generate the daily sales report.
+
+**AI (Cerebro):**  
+Sure, I can help. Which application were you using when this happened?
+
+**User:**  
+Sales App.
+
+**AI:**  
+Understood. When did the issue occur?
+
+**User:**  
+Just now around 10:15 AM.
+
+**AI:**  
+Thanks. Let me check the knowledge base…  
+I found a relevant match: **“Daily Sales Report fails with Error 1203.”**
+
+**Possible Cause:** Yesterday’s data sync is incomplete.  
+**Steps to fix:**  
+1. Go to **Admin → Sync Status**  
+2. Tap **Force Sync**  
+3. Wait 1 minute and retry
+
+Did this help?
+
+**User:**  
+Yes, that fixed it.
+
+**AI:**  
+Great! I’ll close this interaction. Let me know if you need anything else.
+
+---
+
+# ✅ Scenario 2 — Similar Ticket Identified
+
+**User:**  
+The payroll summary isn’t loading.
+
+**AI:**  
+Got it. Checking… I found **3 similar issues** in past tickets:
+
+1. “Payroll summary blank — missing period settings”  
+2. “Payroll summary stuck loading — client cache issue”  
+3. “Payroll summary error 503 — server outage”
+
+Are any of these the same issue?
+
+**User:**  
+Maybe #1.
+
+**AI:**  
+Let me confirm — what payroll period are you trying to view?
+
+**User:**  
+January 2025.
+
+**AI:**  
+Thanks. It looks like the **January 2025 payroll period hasn’t been created**.  
+Would you like help creating it?
+
+**User:**  
+Yes.
+
+**AI:**  
+Please follow:  
+1. Go to **Payroll Settings**  
+2. Click **Create Period**  
+3. Choose **January 2025**  
+4. Save
+
+**User:**  
+It works now.
+
+**AI:**  
+Issue resolved! Happy to help.
+
+---
+
+# ✅ Scenario 3 — No KB Match → Ticket Created
+
+**User:**  
+The system logged me out 3 times in 10 minutes.
+
+**AI:**  
+That sounds frustrating. Which application are you on?
+
+**User:**  
+Inventory App.
+
+**AI:**  
+And what device?
+
+**User:**  
+Android.
+
+**AI:**  
+Thanks. I couldn’t find a matching article in the knowledge base, so I’ll log a ticket for investigation.
+
+**Ticket Created:** #48201  
+**Status:** Log Analysis In Progress
+
+I’ll update you here when I get results.
+
+---
+
+# ✅ Scenario 4 — Ticket Status Check
+
+**User:**  
+Check ticket 48201.
+
+**AI:**  
+Latest update:  
+- **Log Analysis Completed**  
+- **Fix Applied**  
+- **Root Cause:** Session timeout misconfiguration for Android clients  
+- **Applied by:** IT Support at 14:32
+
+Is the issue fixed on your side?
+
+**User:**  
+Yes, thanks.
+
+**AI:**  
+Glad to hear it! I’ll close the ticket.
+
+---
+
+# ✅ Scenario 5 — Deep KB Interaction (With File Upload)
+
+**User:**  
+My data import keeps failing.
+
+**AI:**  
+Which file type are you uploading? CSV, XLSX, or JSON?
+
+**User:**  
+CSV.
+
+**AI:**  
+Got it. According to our Import Guide, CSV must be UTF‑8 encoded. Can you confirm your file format?
+
+**User:**  
+Not sure.
+
+**AI:**  
+No problem — upload the file and I’ll check.
+
+**User uploads file**
+
+**AI:**  
+Your file is ISO‑8859 encoded. I’ve converted it to **UTF‑8**.  
+Here is the corrected file.
+
+Try importing this.
+
+**User:**  
+It works now!
+
+**AI:**  
+Great! Let me know if you need help with anything else.
+
+---
+
+# ✅ Scenario 6 — Multi-Step Diagnostics Before Ticket Creation
+
+**User:**  
+My dashboard is showing “No Data”.
+
+**AI:**  
+Understood. Let me run a few checks.  
+First — which dashboard are you referring to?
+
+**User:**  
+Operations Dashboard.
+
+**AI:**  
+Thanks. Checking your data pipeline…  
+I see yesterday’s ETL job failed.  
+Have you recently updated your data source settings?
+
+**User:**  
+No.
+
+**AI:**  
+Okay. Please confirm: is your data source **Warehouse A**?
+
+**User:**  
+Yes.
+
+**AI:**  
+Thanks. Based on logs:  
+- ETL job failed at 02:11 AM  
+- Reason: “missing SKU mapping”  
+
+Would you like me to create a ticket for the data team?
+
+**User:**  
+Yes.
+
+**AI:**  
+Ticket **#48320** created. I’ll keep you updated.
+
+---
+
+# ✅ Scenario 7 — IT Support Requests More Information
+
+**AI (System update):**  
+Ticket #48320: Technician needs more information.
+
+**Technician:**  
+Hi, can you share your latest SKU export file so we can verify mappings?
+
+**User:**  
+Sure, uploading.
+
+**User uploads file**
+
+**Technician:**  
+Thanks — fix applied. Dashboard should update within 5 minutes.
+
+**AI:**  
+Is your issue resolved now?
+
+**User:**  
+Yes.
+
+**AI:**  
+Great! Closing the ticket.
+
+---
+
+# ✅ Scenario 8 — Onboarding/First-Time User Guidance
+
+**User:**  
+How do I import employees?
+
+**AI:**  
+I can help — here’s the quick guide:  
+1. Go to **HR → Employees**  
+2. Click **Import Employees**  
+3. Download the **Template CSV**  
+4. Fill it in and upload
+
+Would you like a clickable walkthrough?
+
+**User:**  
+Yes.
+
+**AI:**  
+Opening step-by-step mode…
+
+---
+
+---
+
+## 🎯 Scenario 9 — Full Path: From User Report to Log-Based Fix & Ticket Closure
+
+### 1. User Reports Issue to Cerebro
+
+**User:**  
+Every time I try to approve invoices, I get an error and it stops.
+
+**Cerebro (AI):**  
+Thanks for letting me know. I’ll help you with that.  
+Which application are you using?
+
+**User:**  
+Finance App.
+
+**Cerebro:**  
+Got it. When did this start happening?
+
+**User:**  
+About 10 minutes ago.
+
+**Cerebro:**  
+Understood. Do you see any specific error message or code on the screen?
+
+**User:**  
+Yes, it says: `APPROVAL_SERVICE_TIMEOUT`.
+
+**Cerebro:**  
+Thanks, that’s helpful. You can upload a screenshot too if you’d like.
+
+**User uploads screenshot (optional)**
+
+**Cerebro (thinking):**  
+(Internally logs: app = Finance App, operation = Invoice Approval, error = APPROVAL_SERVICE_TIMEOUT, time ≈ now - 10 minutes.)
+
+---
+
+### 2. Ticket Is Created & Logs Are Checked
+
+**Cerebro:**  
+I’ll create a support ticket and check the application logs for you.
+
+**System (Ticketing):**  
+🎫 Ticket **#49510** created  
+- Application: Finance App  
+- Operation: Invoice Approval  
+- Error: APPROVAL_SERVICE_TIMEOUT  
+- User: [User Name]  
+- Time: [Timestamp]
+
+**Cerebro (to User):**  
+I’ve created ticket **#49510** and I’m checking the logs now. I’ll update you when I find something.
+
+---
+
+### 3. AAL Looks at the Logs & Suggests a Fix
+
+**System (AAL — Log Analyzer, internal):**  
+- Scanning logs for Finance App, Invoice Approval, last 30 minutes  
+- Detected repeated error: `APPROVAL_SERVICE_TIMEOUT`  
+- Correlated event: Deployment of `approval-service v1.3.7` 15 minutes ago  
+- Related error: Connection refused to `approval-db`  
+- Suggested Root Cause: Misconfigured connection string in `approval-service` deployment  
+- Suggested Fix: Rollback to `approval-service v1.3.6` or fix connection string for `approval-db`
+
+**System (AAL → Ticketing):**  
+Attach log analysis summary + recommended fix to **ticket #49510**.
+
+**Cerebro (internal note in ticket):**  
+> AAL suggests: Rollback `approval-service` to v1.3.6 or correct connection string to `approval-db`.
+
+---
+
+### 4. IT Support Opens Ticket & Sees Log + Suggested Fix
+
+**IT Support (Technician) opens Ticket #49510 in their console.**
+
+**Ticket View shows:**
+- User description  
+- Chat transcript  
+- Error code: APPROVAL_SERVICE_TIMEOUT  
+- Attached screenshot (if any)  
+- AAL Log Analysis Summary:  
+  - Recent deployment detected  
+  - DB connection failure  
+  - Suggested Fix: rollback or fix connection string  
+
+**Technician (thinking):**  
+“Looks like the latest deployment broke the DB connection. I’ll fix the config and redeploy.”
+
+---
+
+### 5. IT Support Applies Fix & Tests
+
+**Technician:**  
+- Updates `approval-service` configuration with correct `approval-db` connection string  
+- Redeploys `approval-service`  
+- Runs internal test: tries invoice approval in staging or monitoring console  
+- Confirms success: no more APPROVAL_SERVICE_TIMEOUT  
+
+**Technician (in Ticket #49510):**  
+> Fix applied: updated `approval-service` connection string to `approval-db` and redeployed.  
+> Internal tests show invoice approval is now working normally.
+
+**Ticket Status:**  
+- Moved from “In Progress” → “Fix Applied — Awaiting User Confirmation”
+
+---
+
+### 6. Cerebro Notifies the User That a Fix Was Applied
+
+**Cerebro (to User in chat):**  
+Good news — our technical team has applied a fix for ticket **#49510**.
+
+**Summary of the fix:**  
+- We found a configuration problem after a recent deployment of the invoice approval service.  
+- The connection to the database was failing, which caused the timeout error.  
+- IT Support has updated the configuration and redeployed the service.
+
+Please try approving an invoice again and let me know if it works now.
+
+---
+
+### 7. User Tests & Confirms
+
+**User:**  
+I just tried again. It works now — no error.
+
+**Cerebro:**  
+That’s great to hear! I’ll mark ticket **#49510** as resolved.
+
+Would you like to see a quick summary of what happened?
+
+**User:**  
+Yes.
+
+**Cerebro:**  
+**Ticket #49510 — Resolved**  
+- Issue: Invoice approval failed with `APPROVAL_SERVICE_TIMEOUT`  
+- Root cause: Misconfigured database connection after deployment  
+- Fix: Configuration updated and service redeployed  
+- Status: ✅ Resolved and closed
+
+Thanks for your patience. Let me know if you need anything else.
+
+---
+
+### 8. Ticket Closed & Knowledge Base Updated
+
+**System (Ticketing):**  
+Ticket **#49510** status → Closed.
+
+**System (Cerebro & KB):**  
+- Creates / updates KB article:  
+  - “Invoice Approval Timeout (APPROVAL_SERVICE_TIMEOUT) after deployment”  
+- Links log pattern + deployment metadata  
+- Next time, Cerebro can suggest this fix **directly from KB** if the same error appears.
+
+---
+
+
+
+
+# End of Scenario Scripts
+
