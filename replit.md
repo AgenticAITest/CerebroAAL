@@ -54,6 +54,8 @@ Demonstrate an end-to-end AI support workflow where:
   - **Quick questions dropdown** - Lightning bolt icon with all 9 scenario responses for fast demo execution
   - **Thinking indicator** - Added realistic "Cerebro is thinking..." animation with 1000ms delay (configurable via CEREBRO_THINKING_DELAY_MS env var)
   - **Message timing** - User messages appear immediately, followed by thinking indicator, then Cerebro's response (optimistic updates with proper cache management)
+  - **Ticket numbers** - Simplified to always use #48201 for demo consistency
+  - **Scenario 5 (file upload)** - Fixed to not process files, provides downloadable dummy CSV, handles "It works now!" confirmation
   - Fixed FormData handling in apiRequest to properly support file uploads
   
 - **2025-11-15**: Complete MVP implementation
@@ -71,9 +73,9 @@ Demonstrate an end-to-end AI support workflow where:
 The system includes scripted responses for all 9 scenarios:
 1. Standard KB solution found (e.g., daily sales report errors)
 2. Similar ticket matching (e.g., payroll summary issues)
-3. Ticket creation when no KB match exists
+3. Ticket creation when no KB match exists (always creates ticket #48201)
 4. Ticket status updates and tracking
-5. File upload with analysis (CSV encoding checks)
+5. File upload with analysis (CSV encoding checks) - provides downloadable converted file
 6. Multi-step diagnostics before escalation
 7. IT Support requests more information
 8. Onboarding/first-time user guidance
