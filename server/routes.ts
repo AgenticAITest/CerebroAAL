@@ -302,5 +302,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Download converted CSV file (demo)
+  app.get("/api/download-converted-file", (req, res) => {
+    // Generate a simple dummy CSV file
+    const csvContent = `Name,Email,Department,Start Date
+John Doe,john.doe@example.com,Engineering,2025-01-15
+Jane Smith,jane.smith@example.com,Marketing,2025-02-01
+Bob Johnson,bob.johnson@example.com,Sales,2025-02-10`;
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="converted_utf8.csv"');
+    res.send(csvContent);
+  });
+
   return httpServer;
 }

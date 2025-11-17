@@ -280,13 +280,20 @@ export class CerebroAI {
       return "No problem — upload the file and I'll check.";
     }
 
+    // After file analysis, user confirms it works
+    if (state.step === "file_analyzed" && (lowerMsg.includes("works") || lowerMsg.includes("worked") || lowerMsg.includes("fixed"))) {
+      state.step = "resolved";
+      return "Great! Happy to help. Let me know if you need anything else.";
+    }
+
     return "Which file type are you uploading? CSV, XLSX, or JSON?";
   }
 
   private handleFileUpload(file: any, state: ConversationState, userMessage: string): string {
     if (state.scenario === "scenario5_import" && state.step === "request_file") {
       state.step = "file_analyzed";
-      return "Your file is ISO‑8859 encoded. I've converted it to **UTF‑8**.\nHere is the corrected file.\n\nTry importing this.";
+      state.uploadedFileName = file?.originalname || "uploaded_file.csv";
+      return "Your file is ISO‑8859 encoded. I've converted it to **UTF‑8**.\n\n[Download converted file](/api/download-converted-file)\n\nTry importing this.";
     }
 
     return "Thanks for uploading the file. Let me analyze it...";
@@ -506,6 +513,7 @@ interface ConversationState {
   errorCode?: string;
   device?: string;
   fileType?: string;
+  uploadedFileName?: string;
   dashboard?: string;
   payrollPeriod?: string;
   similarTickets?: any[];
