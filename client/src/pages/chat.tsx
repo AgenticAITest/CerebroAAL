@@ -5,6 +5,7 @@ import { Message } from "@shared/schema";
 import { ChatMessage } from "@/components/ChatMessage";
 import { MessageInput } from "@/components/MessageInput";
 import { KBArticleCard } from "@/components/KBArticleCard";
+import { TypingIndicator } from "@/components/TypingIndicator";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Sparkles, Ticket, Home, RotateCcw } from "lucide-react";
@@ -17,6 +18,7 @@ export default function ChatPage() {
   const [conversationId, setConversationId] = useState(() => 
     Math.random().toString(36).substring(7)
   );
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
@@ -37,6 +39,7 @@ export default function ChatPage() {
 
   const sendMessageMutation = useMutation({
     mutationFn: async ({ content, file }: { content: string; file?: File }) => {
+      setIsTyping(true);
       const formData = new FormData();
       formData.append('conversationId', conversationId);
       formData.append('content', content);
@@ -47,9 +50,13 @@ export default function ChatPage() {
       return await apiRequest('POST', '/api/send-message', formData);
     },
     onSuccess: () => {
+      setIsTyping(false);
       queryClient.invalidateQueries({ queryKey: [`/api/messages/${conversationId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/kb-suggestions/${conversationId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/conversation-ticket/${conversationId}`] });
+    },
+    onError: () => {
+      setIsTyping(false);
     },
   });
 
@@ -156,6 +163,8 @@ export default function ChatPage() {
               {messages.map((message) => (
                 <ChatMessage key={message.id} message={message} />
               ))}
+
+              {isTyping && <TypingIndicator />}
 
               {kbResults && kbResults.articles && kbResults.articles.length > 0 && (
                 <div className="space-y-3">

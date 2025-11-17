@@ -1,6 +1,12 @@
 import { storage } from "./storage";
 import type { Message, Ticket } from "@shared/schema";
 
+const THINKING_DELAY_MS = parseInt(process.env.CEREBRO_THINKING_DELAY_MS || "500", 10);
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export class CerebroAI {
   private conversationState: Map<string, ConversationState>;
   private conversationHistory: Map<string, string[]>;
@@ -13,6 +19,8 @@ export class CerebroAI {
   async processMessage(conversationId: string, userMessage: string, file?: any): Promise<string> {
     try {
       console.log("CerebroAI.processMessage called with:", { conversationId, userMessage: userMessage?.substring(0, 50) });
+      
+      await sleep(THINKING_DELAY_MS);
       
       const state = this.getState(conversationId);
       const messages = await storage.getMessages(conversationId);
