@@ -1,27 +1,25 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Message } from "@shared/schema";
 import { ChatMessage } from "@/components/ChatMessage";
 import { MessageInput } from "@/components/MessageInput";
 import { KBArticleCard } from "@/components/KBArticleCard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Sparkles, Ticket } from "lucide-react";
+import { Sparkles, Ticket, Home, RotateCcw } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWebSocket } from "@/lib/websocket";
 
 export default function ChatPage() {
-  const [conversationId] = useState(() => {
-    const stored = sessionStorage.getItem('cerebro-conversation-id');
-    if (stored) return stored;
-    const newId = Math.random().toString(36).substring(7);
-    sessionStorage.setItem('cerebro-conversation-id', newId);
-    return newId;
-  });
+  const [conversationId, setConversationId] = useState(() => 
+    Math.random().toString(36).substring(7)
+  );
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   
   useWebSocket();
 
@@ -77,17 +75,54 @@ export default function ChatPage() {
     sendMessageMutation.mutate({ content, file });
   };
 
+  const handleClearConversation = () => {
+    const newId = Math.random().toString(36).substring(7);
+    
+    queryClient.setQueryData([`/api/messages/${newId}`], []);
+    queryClient.setQueryData([`/api/kb-suggestions/${newId}`], null);
+    queryClient.setQueryData([`/api/conversation-ticket/${newId}`], null);
+    
+    setConversationId(newId);
+    
+    toast({
+      title: "Conversation cleared",
+      description: "Starting fresh conversation",
+    });
+  };
+
   return (
     <div className="flex flex-col h-screen bg-background">
       <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="container max-w-3xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-chart-1/10 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-chart-1" />
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-chart-1/10 flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-chart-1" />
+              </div>
+              <div>
+                <h1 className="text-xl font-semibold" data-testid="text-page-title">Cerebro AI Support</h1>
+                <p className="text-xs text-muted-foreground">Intelligent troubleshooting assistant</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-semibold" data-testid="text-page-title">Cerebro AI Support</h1>
-              <p className="text-xs text-muted-foreground">Intelligent troubleshooting assistant</p>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleClearConversation}
+                data-testid="button-clear-conversation"
+              >
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Clear
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setLocation('/')}
+                data-testid="button-home"
+              >
+                <Home className="w-4 h-4 mr-2" />
+                Home
+              </Button>
             </div>
           </div>
         </div>
