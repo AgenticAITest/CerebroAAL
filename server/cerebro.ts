@@ -11,15 +11,19 @@ export class CerebroAI {
   }
 
   async processMessage(conversationId: string, userMessage: string, file?: any): Promise<string> {
-    const state = this.getState(conversationId);
-    const messages = await storage.getMessages(conversationId);
-    
-    if (!this.conversationHistory.has(conversationId)) {
-      this.conversationHistory.set(conversationId, []);
-    }
-    this.conversationHistory.get(conversationId)!.push(userMessage);
-    
-    const lowerMsg = userMessage.toLowerCase();
+    try {
+      console.log("CerebroAI.processMessage called with:", { conversationId, userMessage: userMessage?.substring(0, 50) });
+      
+      const state = this.getState(conversationId);
+      const messages = await storage.getMessages(conversationId);
+      
+      if (!this.conversationHistory.has(conversationId)) {
+        this.conversationHistory.set(conversationId, []);
+      }
+      this.conversationHistory.get(conversationId)!.push(userMessage);
+      
+      const lowerMsg = userMessage.toLowerCase();
+      console.log("Processing message, current state:", { scenario: state.scenario, application: state.application, step: state.step });
 
     // Scenario 4: Ticket status check
     if (lowerMsg.includes("check ticket") || lowerMsg.includes("ticket") && /\d{5}/.test(userMessage)) {
@@ -55,6 +59,10 @@ export class CerebroAI {
     }
 
     return this.handleScenarioFlow(conversationId, userMessage, state);
+    } catch (error: any) {
+      console.error("Error in processMessage:", error);
+      throw error;
+    }
   }
 
   private getState(conversationId: string): ConversationState {

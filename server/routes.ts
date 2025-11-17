@@ -49,6 +49,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { conversationId, content } = req.body;
       const file = req.file;
 
+      console.log("Received message:", { conversationId, content, hasFile: !!file });
+
+      if (!conversationId || !content) {
+        return res.status(400).json({ error: "Missing conversationId or content" });
+      }
+
       // Store user message
       await storage.createMessage({
         conversationId,
@@ -57,12 +63,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ticketId: null,
       });
 
+      console.log("Calling cerebroAI.processMessage");
       // Get AI response
       const aiResponse = await cerebroAI.processMessage(
         conversationId,
         content,
         file
       );
+      console.log("AI response:", aiResponse);
 
       // Store AI response if there is one
       if (aiResponse) {
