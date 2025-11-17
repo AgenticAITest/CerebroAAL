@@ -287,6 +287,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Run log analysis for a ticket
+  app.post("/api/tickets/:id/run-analysis", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const ticket = await storage.getTicket(id);
+      
+      if (!ticket) {
+        return res.status(404).json({ error: "Ticket not found" });
+      }
+
+      await storage.updateTicketStatus(id, "log_analysis");
+
+      setTimeout(async () => {
+        const analyses: Record<string, any> = {
+          "Inventory App": {
+            errorPattern: "SESSION_TIMEOUT on Android clients",
+            rootCause: "Session timeout misconfiguration for Android clients in the authentication service",
+            suggestedFix: "Update session timeout configuration for mobile clients from 5 minutes to 30 minutes",
+            logExcerpt: `[2025-11-15 10:10:15] WARN  auth-service: Session expired for user android-client-123
+[2025-11-15 10:12:32] WARN  auth-service: Session expired for user android-client-123
+[2025-11-15 10:15:41] WARN  auth-service: Session expired for user android-client-123`,
+            correlatedEvent: "Recent authentication service update deployed 2 days ago",
+          },
+        };
+
+        const analysisData = analyses[ticket.application] || analyses["Inventory App"];
+        await storage.createLogAnalysis({
+          ticketId: id,
+          ...analysisData,
+        });
+        
+        broadcastTicketUpdate(id);
+      }, 1500);
+
+      broadcastTicketUpdate(id);
+      res.json({ success: true, message: "Log analysis started" });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Apply fix for a ticket
+  app.post("/api/tickets/:id/apply-fix", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const ticket = await storage.getTicket(id);
+      
+      if (!ticket) {
+        return res.status(404).json({ error: "Ticket not found" });
+      }
+
+      await storage.updateTicketStatus(id, "fix_applied");
+      
+      broadcastTicketUpdate(id);
+      res.json({ success: true, message: "Fix applied" });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Request more information from user
+  app.post("/api/tickets/:id/request-info", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { message } = req.body;
+      
+      const ticket = await storage.getTicket(id);
+      if (!ticket) {
+        return res.status(404).json({ error: "Ticket not found" });
+      }
+
+      const conversationId = storage.getConversationIdByTicket(id);
+      if (!conversationId) {
+        return res.status(404).json({ error: "Conversation not found for ticket" });
+      }
+
+      await storage.createMessage({
+        conversationId,
+        role: "technician",
+        content: message,
+        ticketId: id,
+      });
+
+      await storage.updateTicketStatus(id, "in_progress");
+      
+      broadcastTicketUpdate(id);
+      res.json({ success: true, message: "Request sent to user" });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Search KB articles
   app.get("/api/kb/search", async (req, res) => {
     try {

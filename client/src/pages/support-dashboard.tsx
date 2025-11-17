@@ -51,14 +51,62 @@ export default function SupportDashboard() {
     enabled: !!selectedTicketId,
   });
 
+  const runLogAnalysisMutation = useMutation({
+    mutationFn: async (ticketId: string) => {
+      return await apiRequest('POST', `/api/tickets/${ticketId}/run-analysis`, {});
+    },
+    onSuccess: () => {
+      toast({
+        title: "Log Analysis Started",
+        description: "AAL is analyzing system logs...",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/tickets'] });
+      if (selectedTicketId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/tickets/${selectedTicketId}`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/ticket-analysis/${selectedTicketId}`] });
+      }
+    },
+  });
+
   const applyFixMutation = useMutation({
     mutationFn: async (ticketId: string) => {
-      return await apiRequest('PATCH', `/api/tickets/${ticketId}/status`, { status: 'fix_applied' });
+      return await apiRequest('POST', `/api/tickets/${ticketId}/apply-fix`, {});
     },
     onSuccess: () => {
       toast({
         title: "Fix Applied",
-        description: "The suggested fix has been applied successfully.",
+        description: "The fix has been applied successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/tickets'] });
+      if (selectedTicketId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/tickets/${selectedTicketId}`] });
+      }
+    },
+  });
+
+  const requestInfoMutation = useMutation({
+    mutationFn: async ({ ticketId, message }: { ticketId: string; message: string }) => {
+      return await apiRequest('POST', `/api/tickets/${ticketId}/request-info`, { message });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Message Sent",
+        description: "Request sent to user.",
+      });
+      if (selectedTicketId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/ticket-messages/${selectedTicketId}`] });
+      }
+    },
+  });
+
+  const closeTicketMutation = useMutation({
+    mutationFn: async (ticketId: string) => {
+      return await apiRequest('PATCH', `/api/tickets/${ticketId}/status`, { status: 'resolved' });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Ticket Closed",
+        description: "Ticket has been marked as resolved.",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/tickets'] });
       if (selectedTicketId) {
@@ -265,17 +313,105 @@ export default function SupportDashboard() {
                       <CardTitle className="text-base">Actions</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <Button 
-                        className="w-full" 
-                        data-testid="button-apply-fix"
-                        onClick={() => selectedTicketId && applyFixMutation.mutate(selectedTicketId)}
-                        disabled={applyFixMutation.isPending || selectedTicket?.status === 'fix_applied' || selectedTicket?.status === 'resolved'}
-                      >
-                        {applyFixMutation.isPending ? "Applying..." : "Apply Suggested Fix"}
-                      </Button>
-                      <Button variant="outline" className="w-full" data-testid="button-request-info">
-                        Request More Information
-                      </Button>
+                      {selectedTicket.ticketNumber === 48201 ? (
+                        <>
+                          {/* Ticket #48201: Session Timeout Issue */}
+                          {selectedTicket.status === 'new' && (
+                            <Button 
+                              className="w-full" 
+                              data-testid="button-run-analysis"
+                              onClick={() => selectedTicketId && runLogAnalysisMutation.mutate(selectedTicketId)}
+                              disabled={runLogAnalysisMutation.isPending}
+                            >
+                              {runLogAnalysisMutation.isPending ? "Analyzing..." : "Run Log Analysis"}
+                            </Button>
+                          )}
+                          {(selectedTicket.status === 'log_analysis' || ticketAnalysis) && selectedTicket.status !== 'resolved' && (
+                            <Button 
+                              className="w-full" 
+                              data-testid="button-apply-session-fix"
+                              onClick={() => selectedTicketId && applyFixMutation.mutate(selectedTicketId)}
+                              disabled={applyFixMutation.isPending}
+                            >
+                              {applyFixMutation.isPending ? "Applying..." : "Apply Mobile Session Fix"}
+                            </Button>
+                          )}
+                          {selectedTicket.status !== 'new' && selectedTicket.status !== 'resolved' && (
+                            <Button 
+                              variant="outline"
+                              className="w-full" 
+                              data-testid="button-close-ticket"
+                              onClick={() => selectedTicketId && closeTicketMutation.mutate(selectedTicketId)}
+                              disabled={closeTicketMutation.isPending}
+                            >
+                              {closeTicketMutation.isPending ? "Closing..." : "Close Ticket"}
+                            </Button>
+                          )}
+                        </>
+                      ) : selectedTicket.ticketNumber === 48320 ? (
+                        <>
+                          {/* Ticket #48320: Dashboard No Data / ETL Failure */}
+                          {selectedTicket.status === 'new' && (
+                            <Button 
+                              className="w-full" 
+                              data-testid="button-request-sku-file"
+                              onClick={() => {
+                                if (selectedTicketId) {
+                                  requestInfoMutation.mutate({
+                                    ticketId: selectedTicketId,
+                                    message: "Hi, can you share your latest SKU export file so we can verify mappings?"
+                                  });
+                                }
+                              }}
+                              disabled={requestInfoMutation.isPending}
+                            >
+                              {requestInfoMutation.isPending ? "Sending..." : "Request SKU Export File"}
+                            </Button>
+                          )}
+                          {selectedTicket.status !== 'new' && selectedTicket.status !== 'resolved' && (
+                            <Button 
+                              className="w-full" 
+                              data-testid="button-apply-etl-fix"
+                              onClick={() => selectedTicketId && applyFixMutation.mutate(selectedTicketId)}
+                              disabled={applyFixMutation.isPending}
+                            >
+                              {applyFixMutation.isPending ? "Applying..." : "Apply ETL Fix"}
+                            </Button>
+                          )}
+                          {selectedTicket.status !== 'new' && selectedTicket.status !== 'resolved' && (
+                            <Button 
+                              variant="outline"
+                              className="w-full" 
+                              data-testid="button-close-ticket"
+                              onClick={() => selectedTicketId && closeTicketMutation.mutate(selectedTicketId)}
+                              disabled={closeTicketMutation.isPending}
+                            >
+                              {closeTicketMutation.isPending ? "Closing..." : "Close Ticket"}
+                            </Button>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          {/* Generic actions for other tickets */}
+                          <Button 
+                            className="w-full" 
+                            data-testid="button-apply-fix"
+                            onClick={() => selectedTicketId && applyFixMutation.mutate(selectedTicketId)}
+                            disabled={applyFixMutation.isPending || selectedTicket.status === 'resolved'}
+                          >
+                            {applyFixMutation.isPending ? "Applying..." : "Apply Fix"}
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            className="w-full" 
+                            data-testid="button-close-ticket"
+                            onClick={() => selectedTicketId && closeTicketMutation.mutate(selectedTicketId)}
+                            disabled={closeTicketMutation.isPending}
+                          >
+                            {closeTicketMutation.isPending ? "Closing..." : "Close Ticket"}
+                          </Button>
+                        </>
+                      )}
                     </CardContent>
                   </Card>
                 </div>
