@@ -49,7 +49,8 @@ export class MemStorage implements IStorage {
     this.kbArticles = new Map();
     this.logAnalyses = new Map();
     this.conversationToTicket = new Map();
-    this.ticketCounter = 48200;
+    // Start at 48196 so after seeding 4 demo tickets, the next user ticket will be 48201
+    this.ticketCounter = 48196;
 
     this.seedKBArticles();
     this.seedDemoTickets();
