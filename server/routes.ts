@@ -46,13 +46,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Send a message
   app.post("/api/send-message", upload.single("file"), async (req, res) => {
     try {
-      const { conversationId, content } = req.body;
+      const { conversationId } = req.body;
+      let { content } = req.body;
       const file = req.file;
 
       console.log("Received message:", { conversationId, content, hasFile: !!file });
 
-      if (!conversationId || !content) {
-        return res.status(400).json({ error: "Missing conversationId or content" });
+      if (!conversationId) {
+        return res.status(400).json({ error: "Missing conversationId" });
+      }
+
+      // Allow file-only uploads with placeholder content
+      if (!content && file) {
+        content = `Uploaded file: ${file.originalname}`;
+      }
+
+      if (!content) {
+        return res.status(400).json({ error: "Missing content or file" });
       }
 
       // Store user message
