@@ -27,7 +27,7 @@ Demonstrate an end-to-end AI support workflow where:
   
 - **Components**:
   - `ChatMessage` - Message bubbles for different roles
-  - `MessageInput` - Chat input with file upload
+  - `MessageInput` - Chat input with file upload and quick questions dropdown
   - `TicketCard` - Ticket preview cards
   - `StatusBadge` - Color-coded status indicators
   - `KBArticleCard` - Expandable knowledge base articles
@@ -47,28 +47,36 @@ Demonstrate an end-to-end AI support workflow where:
 - Dark mode support
 
 ## Recent Changes
+- **2025-11-17**: Demo enhancements for easier scenario testing
+  - **Fresh conversations** - Removed sessionStorage persistence; each visit creates new conversation
+  - **Clear & Home buttons** - Added header navigation to clear conversation or return home
+  - **Quick questions dropdown** - Lightning bolt icon with all 9 scenario responses for fast demo execution
+  - Fixed FormData handling in apiRequest to properly support file uploads
+  
 - **2025-11-15**: Complete MVP implementation
   - Created all data schemas and TypeScript interfaces
   - Built complete frontend with chat, dashboard, and ticket views
   - Configured design system with Inter fonts and professional color palette
   - Implemented all core components following design guidelines
   - Added WebSocket integration for real-time ticket/message updates
-  - Implemented conversation ID persistence via sessionStorage
   - Added ticket status update mutations in support dashboard
   - Fixed icon imports (replaced WrenchScrewdriver with Wrench from lucide-react)
   - Backend includes scripted AI responses matching demo scenarios
   - Full CRUD API for tickets, messages, KB articles, and log analyses
 
 ## Demo Scenarios
-The system includes scripted responses for:
+The system includes scripted responses for all 9 scenarios:
 1. Standard KB solution found (e.g., daily sales report errors)
 2. Similar ticket matching (e.g., payroll summary issues)
 3. Ticket creation when no KB match exists
 4. Ticket status updates and tracking
 5. File upload with analysis (CSV encoding checks)
 6. Multi-step diagnostics before escalation
-7. IT Support interaction with AAL insights
-8. Full lifecycle: User report → AAL analysis → IT fix → Resolution
+7. IT Support requests more information
+8. Onboarding/first-time user guidance
+9. Full lifecycle: User report → AAL analysis → IT fix → Resolution
+
+**Quick Demo Mode**: Use the lightning bolt icon in the chat input to select pre-filled responses from any scenario, eliminating the need to type each message manually.
 
 ## Technology Stack
 - **Frontend**: React, TypeScript, Tailwind CSS, Shadcn UI, Wouter (routing)
