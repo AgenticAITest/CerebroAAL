@@ -325,7 +325,8 @@ export class MemStorage implements IStorage {
 
   // Helper to get conversation ID from ticket
   getConversationIdByTicket(ticketId: string): string | undefined {
-    for (const [conversationId, tid] of this.conversationToTicket.entries()) {
+    const entries = Array.from(this.conversationToTicket.entries());
+    for (const [conversationId, tid] of entries) {
       if (tid === ticketId) {
         return conversationId;
       }

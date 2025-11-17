@@ -48,7 +48,7 @@ Demonstrate an end-to-end AI support workflow where:
 - Dark mode support
 
 ## Recent Changes
-- **2025-11-17**: Demo enhancements for easier scenario testing
+- **2025-11-17**: IT Support Dashboard enhancements + Demo improvements
   - **Fresh conversations** - Removed sessionStorage persistence; each visit creates new conversation
   - **Clear & Home buttons** - Added header navigation to clear conversation or return home
   - **Quick questions dropdown** - Lightning bolt icon with all 9 scenario responses for fast demo execution
@@ -57,6 +57,14 @@ Demonstrate an end-to-end AI support workflow where:
   - **Ticket numbers** - Updated to match script: #48201 for scenario 3, #48320 for scenario 6
   - **Scenario 5 (file upload)** - Fixed to not process files, provides downloadable dummy CSV, handles "It works now!" confirmation
   - Fixed FormData handling in apiRequest to properly support file uploads
+  - **IT Support Dashboard**:
+    - Added Clear button to reset dashboard to baseline state
+    - Filters to show only scripted tickets (#48201, #48320) by default
+    - Ticket-specific action buttons:
+      - **#48201** (Session Timeout): Run Log Analysis → Apply Mobile Session Fix → Close
+      - **#48320** (Dashboard No Data): Request SKU Export File → Apply ETL Fix → Close
+    - New backend endpoints: /run-analysis, /apply-fix, /request-info
+    - Scenario 7 integration: IT can send messages to users via technician role
   
 - **2025-11-15**: Complete MVP implementation
   - Created all data schemas and TypeScript interfaces
