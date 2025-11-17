@@ -1,7 +1,7 @@
 import { storage } from "./storage";
 import type { Message, Ticket } from "@shared/schema";
 
-const THINKING_DELAY_MS = parseInt(process.env.CEREBRO_THINKING_DELAY_MS || "500", 10);
+const THINKING_DELAY_MS = parseInt(process.env.CEREBRO_THINKING_DELAY_MS || "1000", 10);
 
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));

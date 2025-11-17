@@ -52,7 +52,8 @@ Demonstrate an end-to-end AI support workflow where:
   - **Fresh conversations** - Removed sessionStorage persistence; each visit creates new conversation
   - **Clear & Home buttons** - Added header navigation to clear conversation or return home
   - **Quick questions dropdown** - Lightning bolt icon with all 9 scenario responses for fast demo execution
-  - **Thinking indicator** - Added realistic "Cerebro is thinking..." animation with configurable 500ms delay (set via CEREBRO_THINKING_DELAY_MS env var)
+  - **Thinking indicator** - Added realistic "Cerebro is thinking..." animation with 1000ms delay (configurable via CEREBRO_THINKING_DELAY_MS env var)
+  - **Message timing** - User messages appear immediately, followed by thinking indicator, then Cerebro's response (optimistic updates with proper cache management)
   - Fixed FormData handling in apiRequest to properly support file uploads
   
 - **2025-11-15**: Complete MVP implementation
