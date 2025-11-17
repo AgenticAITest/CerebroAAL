@@ -41,7 +41,6 @@ export class MemStorage implements IStorage {
   private kbArticles: Map<string, KBArticle>;
   private logAnalyses: Map<string, LogAnalysis>;
   private conversationToTicket: Map<string, string>;
-  private ticketCounter: number;
 
   constructor() {
     this.tickets = new Map();
@@ -49,8 +48,6 @@ export class MemStorage implements IStorage {
     this.kbArticles = new Map();
     this.logAnalyses = new Map();
     this.conversationToTicket = new Map();
-    // Start at 48196 so after seeding 4 demo tickets, the next user ticket will be 48201
-    this.ticketCounter = 48196;
 
     this.seedKBArticles();
     this.seedDemoTickets();
@@ -202,7 +199,8 @@ export class MemStorage implements IStorage {
 
   async createTicket(insertTicket: InsertTicket): Promise<Ticket> {
     const id = randomUUID();
-    const ticketNumber = ++this.ticketCounter;
+    // Demo: Always use ticket number 48201
+    const ticketNumber = 48201;
     const ticket: Ticket = {
       ...insertTicket,
       id,
