@@ -28,6 +28,7 @@ Demonstrate an end-to-end AI support workflow where:
 - **Components**:
   - `ChatMessage` - Message bubbles for different roles
   - `MessageInput` - Chat input with file upload and quick questions dropdown
+  - `TypingIndicator` - Animated thinking indicator for realistic chat flow
   - `TicketCard` - Ticket preview cards
   - `StatusBadge` - Color-coded status indicators
   - `KBArticleCard` - Expandable knowledge base articles
@@ -51,6 +52,7 @@ Demonstrate an end-to-end AI support workflow where:
   - **Fresh conversations** - Removed sessionStorage persistence; each visit creates new conversation
   - **Clear & Home buttons** - Added header navigation to clear conversation or return home
   - **Quick questions dropdown** - Lightning bolt icon with all 9 scenario responses for fast demo execution
+  - **Thinking indicator** - Added realistic "Cerebro is thinking..." animation with configurable 500ms delay (set via CEREBRO_THINKING_DELAY_MS env var)
   - Fixed FormData handling in apiRequest to properly support file uploads
   
 - **2025-11-15**: Complete MVP implementation
