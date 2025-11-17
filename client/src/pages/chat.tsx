@@ -27,6 +27,14 @@ export default function ChatPage() {
 
   const { data: messages = [], isLoading } = useQuery<Message[]>({
     queryKey: [`/api/messages/${conversationId}`],
+    select: (data: any) => {
+      if (!Array.isArray(data)) return [];
+      // Normalize timestamps from ISO strings to Date objects
+      return data.map(msg => ({
+        ...msg,
+        timestamp: typeof msg.timestamp === 'string' ? new Date(msg.timestamp) : msg.timestamp,
+      }));
+    },
   });
 
   const { data: kbResults } = useQuery({
@@ -39,7 +47,6 @@ export default function ChatPage() {
 
   const sendMessageMutation = useMutation({
     mutationFn: async ({ content, file }: { content: string; file?: File }) => {
-      setIsTyping(true);
       const formData = new FormData();
       formData.append('conversationId', conversationId);
       formData.append('content', content);
@@ -47,16 +54,61 @@ export default function ChatPage() {
         formData.append('file', file);
       }
       
-      return await apiRequest('POST', '/api/send-message', formData);
+      const response = await apiRequest('POST', '/api/send-message', formData);
+      const data = await response.json();
+      
+      // Handle error responses
+      if (!data.success || !Array.isArray(data.messages)) {
+        throw new Error(data.error || 'Failed to send message');
+      }
+      
+      // Convert timestamp strings to Date objects
+      const messages: Message[] = data.messages.map(msg => ({
+        ...msg,
+        timestamp: new Date(msg.timestamp),
+      }));
+      
+      return { success: data.success, messages };
     },
-    onSuccess: () => {
+    onMutate: async ({ content }) => {
+      await queryClient.cancelQueries({ queryKey: [`/api/messages/${conversationId}`] });
+      
+      const previousMessages = queryClient.getQueryData<Message[]>([`/api/messages/${conversationId}`]);
+      
+      const optimisticMessage: Message = {
+        id: `temp-${Date.now()}`,
+        conversationId,
+        role: 'user',
+        content,
+        timestamp: new Date(),
+        ticketId: null,
+      };
+      
+      queryClient.setQueryData<Message[]>(
+        [`/api/messages/${conversationId}`],
+        (old = []) => [...old, optimisticMessage]
+      );
+      
+      setIsTyping(true);
+      
+      return { previousMessages };
+    },
+    onSuccess: (data) => {
       setIsTyping(false);
-      queryClient.invalidateQueries({ queryKey: [`/api/messages/${conversationId}`] });
+      // Replace the cache with the server's message list (filtering out any temp optimistic messages)
+      const serverMessages = data.messages.filter(msg => {
+        const msgId = String(msg.id || '');
+        return !msgId.startsWith('temp-');
+      });
+      queryClient.setQueryData([`/api/messages/${conversationId}`], serverMessages);
       queryClient.invalidateQueries({ queryKey: [`/api/kb-suggestions/${conversationId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/conversation-ticket/${conversationId}`] });
     },
-    onError: () => {
+    onError: (err, variables, context) => {
       setIsTyping(false);
+      if (context?.previousMessages) {
+        queryClient.setQueryData([`/api/messages/${conversationId}`], context.previousMessages);
+      }
     },
   });
 

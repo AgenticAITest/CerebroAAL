@@ -108,7 +108,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-      res.json({ success: true });
+      // Return all messages for this conversation
+      const allMessages = await storage.getMessages(conversationId);
+      res.json({ success: true, messages: allMessages });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
