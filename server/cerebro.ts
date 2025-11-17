@@ -305,6 +305,7 @@ export class CerebroAI {
 
     if (state.step === "ask_which_dashboard" && lowerMsg.includes("operations")) {
       state.dashboard = "Operations Dashboard";
+      state.application = "Operations Dashboard";
       state.step = "checking_pipeline";
       return "Thanks. Checking your data pipeline…\nI see yesterday's ETL job failed.\nHave you recently updated your data source settings?";
     }
@@ -321,7 +322,7 @@ export class CerebroAI {
 
     if (state.step === "show_diagnostics" && this.isAffirmative(userMessage)) {
       state.willCreateTicket = true;
-      return "Ticket created. I'll keep you updated.";
+      return "Ticket **#48320** created. I'll keep you updated.";
     }
 
     return "Which dashboard are you referring to?";

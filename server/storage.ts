@@ -199,8 +199,10 @@ export class MemStorage implements IStorage {
 
   async createTicket(insertTicket: InsertTicket): Promise<Ticket> {
     const id = randomUUID();
-    // Demo: Always use ticket number 48201
-    const ticketNumber = 48201;
+    // Ticket numbers per scenario (following script exactly)
+    // Scenario 3 (Inventory App): #48201
+    // Scenario 6 (Operations Dashboard): #48320
+    const ticketNumber = insertTicket.application === "Operations Dashboard" ? 48320 : 48201;
     const ticket: Ticket = {
       ...insertTicket,
       id,

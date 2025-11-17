@@ -54,7 +54,7 @@ Demonstrate an end-to-end AI support workflow where:
   - **Quick questions dropdown** - Lightning bolt icon with all 9 scenario responses for fast demo execution
   - **Thinking indicator** - Added realistic "Cerebro is thinking..." animation with 1000ms delay (configurable via CEREBRO_THINKING_DELAY_MS env var)
   - **Message timing** - User messages appear immediately, followed by thinking indicator, then Cerebro's response (optimistic updates with proper cache management)
-  - **Ticket numbers** - Simplified to always use #48201 for demo consistency
+  - **Ticket numbers** - Updated to match script: #48201 for scenario 3, #48320 for scenario 6
   - **Scenario 5 (file upload)** - Fixed to not process files, provides downloadable dummy CSV, handles "It works now!" confirmation
   - Fixed FormData handling in apiRequest to properly support file uploads
   
