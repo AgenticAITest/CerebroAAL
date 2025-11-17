@@ -22,13 +22,19 @@ export default function SupportDashboard() {
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [showOnlyScriptedTickets, setShowOnlyScriptedTickets] = useState(true);
   const { toast } = useToast();
   
   useWebSocket();
 
-  const { data: tickets = [], isLoading } = useQuery<Ticket[]>({
+  const { data: allTickets = [], isLoading } = useQuery<Ticket[]>({
     queryKey: ['/api/tickets'],
   });
+
+  // Filter to show only scripted tickets (#48201 and #48320) by default
+  const tickets = showOnlyScriptedTickets 
+    ? allTickets.filter(t => t.ticketNumber === 48201 || t.ticketNumber === 48320)
+    : allTickets;
 
   const { data: selectedTicket } = useQuery<Ticket>({
     queryKey: [`/api/tickets/${selectedTicketId}`],
@@ -157,6 +163,23 @@ export default function SupportDashboard() {
                 />
               </div>
             </div>
+
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowOnlyScriptedTickets(true);
+                setSearchQuery("");
+                setStatusFilter("all");
+                setSelectedTicketId(null);
+                toast({
+                  title: "Dashboard Reset",
+                  description: "Showing scripted tickets (#48201, #48320)",
+                });
+              }}
+              data-testid="button-clear"
+            >
+              Clear
+            </Button>
           </div>
         </header>
 
