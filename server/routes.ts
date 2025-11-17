@@ -211,6 +211,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Send technician message to ticket
+  app.post("/api/tickets/:ticketId/message", async (req, res) => {
+    try {
+      const { ticketId } = req.params;
+      const { content, technicianName } = req.body;
+
+      const ticket = await storage.getTicket(ticketId);
+      if (!ticket) {
+        return res.status(404).json({ error: "Ticket not found" });
+      }
+
+      // Get conversation ID from ticket
+      const conversationId = await storage.getConversationIdByTicket(ticketId);
+      
+      if (conversationId) {
+        // Create technician message in the conversation
+        await storage.createMessage({
+          conversationId,
+          role: "technician",
+          content: `**${technicianName || "IT Support"}:** ${content}`,
+          ticketId,
+        });
+
+        // Broadcast message update
+        wss.clients.forEach((client) => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({ type: "message_update", conversationId }));
+          }
+        });
+      }
+
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Update ticket status
   app.patch("/api/tickets/:id/status", async (req, res) => {
     try {

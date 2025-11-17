@@ -106,6 +106,48 @@ export class MemStorage implements IStorage {
           "Restart the service if needed",
         ],
       },
+      {
+        title: "Employee Import Guide",
+        application: "HR App",
+        problem: "How to import employees from CSV file",
+        cause: "User needs guidance on importing employee data",
+        solution: "Follow the employee import process step by step",
+        steps: [
+          "Go to HR → Employees",
+          "Click Import Employees",
+          "Download the Template CSV",
+          "Fill it in with employee data (name, email, department, start date)",
+          "Upload the completed CSV file",
+          "Review the preview and confirm import",
+        ],
+      },
+      {
+        title: "Operations Dashboard - No Data Showing",
+        application: "Operations Dashboard",
+        problem: "Dashboard shows no data or blank charts",
+        cause: "ETL job failure or data pipeline issue",
+        solution: "Check ETL job status and data source configuration",
+        steps: [
+          "Go to Admin → Data Pipeline Status",
+          "Check recent ETL job logs",
+          "Verify data source connection settings",
+          "Retry the ETL job if it failed",
+          "Contact data team if issue persists",
+        ],
+      },
+      {
+        title: "Session Timeout on Mobile Devices",
+        application: "Inventory App",
+        problem: "Getting logged out frequently on mobile",
+        cause: "Session timeout configuration issue for mobile clients",
+        solution: "Update session timeout settings for mobile app",
+        steps: [
+          "Contact IT Support to update session timeout",
+          "Clear app cache and data",
+          "Log out and log back in",
+          "Verify the issue is resolved",
+        ],
+      },
     ];
 
     articles.forEach((article) => {
@@ -130,9 +172,25 @@ export class MemStorage implements IStorage {
         userId: "user-demo-2",
         userName: "Bob Johnson",
         application: "Payroll App",
+        description: "Payroll summary blank - missing period settings",
+        status: "resolved",
+        severity: "low",
+      },
+      {
+        userId: "user-demo-3",
+        userName: "Alice Wong",
+        application: "Payroll App",
         description: "Payroll summary stuck loading - client cache issue",
         status: "resolved",
         severity: "low",
+      },
+      {
+        userId: "user-demo-4",
+        userName: "Carlos Martinez",
+        application: "Payroll App",
+        description: "Payroll summary error 503 - server outage",
+        status: "resolved",
+        severity: "high",
       },
     ];
 
@@ -148,6 +206,9 @@ export class MemStorage implements IStorage {
       ...insertTicket,
       id,
       ticketNumber,
+      status: insertTicket.status || "new",
+      errorCode: insertTicket.errorCode ?? null,
+      severity: insertTicket.severity || "medium",
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -189,6 +250,7 @@ export class MemStorage implements IStorage {
     const message: Message = {
       ...insertMessage,
       id,
+      ticketId: insertMessage.ticketId ?? null,
       timestamp: new Date(),
     };
     this.messages.set(id, message);
@@ -230,6 +292,7 @@ export class MemStorage implements IStorage {
     const analysis: LogAnalysis = {
       ...insertAnalysis,
       id,
+      correlatedEvent: insertAnalysis.correlatedEvent ?? null,
       createdAt: new Date(),
     };
     this.logAnalyses.set(id, analysis);
@@ -257,6 +320,16 @@ export class MemStorage implements IStorage {
   // Helper to link conversation to ticket
   linkConversationToTicket(conversationId: string, ticketId: string) {
     this.conversationToTicket.set(conversationId, ticketId);
+  }
+
+  // Helper to get conversation ID from ticket
+  getConversationIdByTicket(ticketId: string): string | undefined {
+    for (const [conversationId, tid] of this.conversationToTicket.entries()) {
+      if (tid === ticketId) {
+        return conversationId;
+      }
+    }
+    return undefined;
   }
 }
 
