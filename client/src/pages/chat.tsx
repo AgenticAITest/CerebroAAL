@@ -47,6 +47,17 @@ export default function ChatPage() {
     queryKey: [`/api/conversation-ticket/${conversationId}`],
   });
 
+  // Get all technician messages across all conversations
+  const { data: allTechnicianMessages = [] } = useQuery<Message[]>({
+    queryKey: ['/api/all-technician-messages'],
+    select: (data) => {
+      return data.map(msg => ({
+        ...msg,
+        timestamp: typeof msg.timestamp === 'string' ? new Date(msg.timestamp) : msg.timestamp,
+      }));
+    },
+  });
+
   const sendMessageMutation = useMutation({
     mutationFn: async ({ content, file }: { content: string; file?: File }) => {
       const formData = new FormData();
@@ -132,13 +143,13 @@ export default function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
   
-  // Count unread technician messages using timestamp comparison
-  const unreadTechnicianCount = messages.filter(msg => {
+  // Count unread technician messages across ALL conversations
+  const unreadTechnicianCount = allTechnicianMessages.filter(msg => {
     if (msg.role !== 'technician') return false;
     if (!lastReadMessageId) return true;
     
     // Find the last read message and compare timestamps
-    const lastReadMsg = messages.find(m => m.id === lastReadMessageId);
+    const lastReadMsg = allTechnicianMessages.find(m => m.id === lastReadMessageId);
     if (!lastReadMsg) return true;
     
     return new Date(msg.timestamp) > new Date(lastReadMsg.timestamp);
@@ -165,14 +176,24 @@ export default function ChatPage() {
   };
   
   const handleBellClick = () => {
-    // Find latest technician message
-    const technicianMessages = messages.filter(msg => msg.role === 'technician');
-    if (technicianMessages.length > 0) {
-      const latestTechMessage = technicianMessages[technicianMessages.length - 1];
-      // Mark all technician messages as read by setting lastReadMessageId to the latest one
+    // Find latest technician message across all conversations
+    if (allTechnicianMessages.length > 0) {
+      const latestTechMessage = allTechnicianMessages[allTechnicianMessages.length - 1];
+      
+      // Mark all technician messages as read
       if (latestTechMessage.id) {
         setLastReadMessageId(latestTechMessage.id);
       }
+      
+      // Navigate to the conversation with the IT message if not already there
+      if (latestTechMessage.conversationId !== conversationId) {
+        setConversationId(latestTechMessage.conversationId);
+        toast({
+          title: "IT Support Message",
+          description: "Showing conversation with IT Support message",
+        });
+      }
+      
       // Scroll to end to show the latest messages
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

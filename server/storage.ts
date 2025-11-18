@@ -264,6 +264,11 @@ export class MemStorage implements IStorage {
       .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
   }
 
+  async getAllMessages(): Promise<Message[]> {
+    return Array.from(this.messages.values())
+      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+  }
+
   async getTicketMessages(ticketId: string): Promise<Message[]> {
     return Array.from(this.messages.values())
       .filter((msg) => msg.ticketId === ticketId)

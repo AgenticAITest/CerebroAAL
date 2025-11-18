@@ -492,5 +492,20 @@ Bob Johnson,bob.johnson@example.com,Sales,2025-02-10`;
     res.send(csvContent);
   });
 
+  // Get all technician messages for the current user (across all conversations)
+  app.get("/api/all-technician-messages", async (req, res) => {
+    try {
+      // Get all messages
+      const allMessages = await storage.getAllMessages();
+      
+      // Filter for technician messages only
+      const technicianMessages = allMessages.filter(msg => msg.role === 'technician');
+      
+      res.json(technicianMessages);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   return httpServer;
 }

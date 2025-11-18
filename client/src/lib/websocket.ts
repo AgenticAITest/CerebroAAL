@@ -31,6 +31,7 @@ export function useWebSocket(onMessage?: (data: any) => void) {
           queryClient.invalidateQueries({ queryKey: [`/api/messages/${data.conversationId}`] });
           queryClient.invalidateQueries({ queryKey: [`/api/kb-suggestions/${data.conversationId}`] });
           queryClient.invalidateQueries({ queryKey: [`/api/conversation-ticket/${data.conversationId}`] });
+          queryClient.invalidateQueries({ queryKey: ['/api/all-technician-messages'] });
         }
 
         if (onMessage) {
