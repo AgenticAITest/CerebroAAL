@@ -366,7 +366,7 @@ export default function SupportDashboard() {
                       ) : selectedTicket.ticketNumber === 48320 ? (
                         <>
                           {/* Ticket #48320: Dashboard No Data / ETL Failure */}
-                          {selectedTicket.status === 'new' && (
+                          {selectedTicket.status !== 'resolved' && (
                             <Button 
                               className="w-full" 
                               data-testid="button-request-info"
