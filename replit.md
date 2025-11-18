@@ -26,8 +26,9 @@ Demonstrate an end-to-end AI support workflow where:
   - `/support` - IT Support dashboard with ticket queue and details
   
 - **Components**:
-  - `ChatMessage` - Message bubbles for different roles
+  - `ChatMessage` - Message bubbles for different roles (user, Cerebro, technician, system)
   - `MessageInput` - Chat input with file upload and quick questions dropdown
+  - `RequestInfoDialog` - IT Support dialog for requesting info from users with quick-fill questions
   - `TypingIndicator` - Animated thinking indicator for realistic chat flow
   - `TicketCard` - Ticket preview cards
   - `StatusBadge` - Color-coded status indicators
@@ -48,6 +49,24 @@ Demonstrate an end-to-end AI support workflow where:
 - Dark mode support
 
 ## Recent Changes
+- **2025-11-18**: Scenario 7 Implementation - IT Support Two-Way Communication
+  - **RequestInfoDialog Component** - Created dialog with text area and lightning bolt dropdown for IT to send requests to users
+  - **Notification Bell** - Added bell icon with red badge in user chat header showing count of unread IT messages
+  - **Bell Click Behavior** - Clicking bell clears badge and scrolls to latest IT technician message
+  - **IT Message Prefix** - All technician messages automatically prefixed with "[IT Support]" to distinguish from Cerebro
+  - **"Request More Info" Button** - Added to IT dashboard for ticket #48320, opens RequestInfoDialog
+  - **Quick-Fill IT Questions** - Dropdown with 4 pre-scripted IT questions including "Can you share your latest SKU export file..."
+  - **Scenario 7 Automated Flow** - Complete scripted sequence:
+    1. IT clicks "Request More Info" → sends question to user
+    2. User receives notification bell → clicks bell → sees IT message
+    3. User uploads file and responds
+    4. After 3 seconds → IT auto-replies: "[IT Support] Thanks — fix applied. Dashboard should update within 5 minutes."
+    5. After 2 seconds → Cerebro asks: "Is your issue resolved now?"
+    6. User responds "yes"
+    7. Cerebro confirms: "Great! Closing the ticket."
+    8. Ticket status updates to resolved automatically
+  - **WebSocket Broadcasting** - IT messages trigger real-time notifications in user chat via WebSocket
+  
 - **2025-11-17**: IT Support Dashboard enhancements + Demo improvements
   - **Fresh conversations** - Removed sessionStorage persistence; each visit creates new conversation
   - **Clear & Home buttons** - Added header navigation to clear conversation or return home
@@ -62,9 +81,8 @@ Demonstrate an end-to-end AI support workflow where:
     - Filters to show only scripted tickets (#48201, #48320) by default
     - Ticket-specific action buttons:
       - **#48201** (Session Timeout): Run Log Analysis → Apply Mobile Session Fix → Close
-      - **#48320** (Dashboard No Data): Request SKU Export File → Apply ETL Fix → Close
+      - **#48320** (Dashboard No Data): Request More Info → Apply ETL Fix → Close
     - New backend endpoints: /run-analysis, /apply-fix, /request-info
-    - Scenario 7 integration: IT can send messages to users via technician role
   
 - **2025-11-15**: Complete MVP implementation
   - Created all data schemas and TypeScript interfaces
@@ -84,12 +102,19 @@ The system includes scripted responses for all 9 scenarios:
 3. Ticket creation when no KB match exists (always creates ticket #48201)
 4. Ticket status updates and tracking
 5. File upload with analysis (CSV encoding checks) - provides downloadable converted file
-6. Multi-step diagnostics before escalation
-7. IT Support requests more information
+6. Multi-step diagnostics before escalation (creates ticket #48320)
+7. **IT Support requests more information** - Complete two-way communication flow:
+   - IT clicks "Request More Info" on ticket #48320 and sends question
+   - User receives notification bell in chat header
+   - User clicks bell, sees IT's message with "[IT Support]" prefix
+   - User uploads file in response
+   - Automated 3-second delay → IT confirms fix applied
+   - Automated 2-second delay → Cerebro asks if resolved
+   - User confirms → Cerebro closes ticket
 8. Onboarding/first-time user guidance
 9. Full lifecycle: User report → AAL analysis → IT fix → Resolution
 
-**Quick Demo Mode**: Use the lightning bolt icon in the chat input to select pre-filled responses from any scenario, eliminating the need to type each message manually.
+**Quick Demo Mode**: Use the lightning bolt icon in chat input (user side) or RequestInfoDialog (IT side) to select pre-filled responses from any scenario, eliminating the need to type each message manually.
 
 ## Technology Stack
 - **Frontend**: React, TypeScript, Tailwind CSS, Shadcn UI, Wouter (routing)

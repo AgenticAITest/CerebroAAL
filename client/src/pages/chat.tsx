@@ -7,8 +7,9 @@ import { MessageInput } from "@/components/MessageInput";
 import { KBArticleCard } from "@/components/KBArticleCard";
 import { TypingIndicator } from "@/components/TypingIndicator";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Sparkles, Ticket, Home, RotateCcw } from "lucide-react";
+import { Sparkles, Ticket, Home, RotateCcw, Bell } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,6 +20,7 @@ export default function ChatPage() {
     Math.random().toString(36).substring(7)
   );
   const [isTyping, setIsTyping] = useState(false);
+  const [lastReadMessageId, setLastReadMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
@@ -129,6 +131,18 @@ export default function ChatPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+  
+  // Count unread technician messages using timestamp comparison
+  const unreadTechnicianCount = messages.filter(msg => {
+    if (msg.role !== 'technician') return false;
+    if (!lastReadMessageId) return true;
+    
+    // Find the last read message and compare timestamps
+    const lastReadMsg = messages.find(m => m.id === lastReadMessageId);
+    if (!lastReadMsg) return true;
+    
+    return new Date(msg.timestamp) > new Date(lastReadMsg.timestamp);
+  }).length;
 
   const handleSendMessage = (content: string, file?: File) => {
     sendMessageMutation.mutate({ content, file });
@@ -142,11 +156,28 @@ export default function ChatPage() {
     queryClient.setQueryData([`/api/conversation-ticket/${newId}`], null);
     
     setConversationId(newId);
+    setLastReadMessageId(null);
     
     toast({
       title: "Conversation cleared",
       description: "Starting fresh conversation",
     });
+  };
+  
+  const handleBellClick = () => {
+    // Find latest technician message
+    const technicianMessages = messages.filter(msg => msg.role === 'technician');
+    if (technicianMessages.length > 0) {
+      const latestTechMessage = technicianMessages[technicianMessages.length - 1];
+      // Mark all technician messages as read by setting lastReadMessageId to the latest one
+      if (latestTechMessage.id) {
+        setLastReadMessageId(latestTechMessage.id);
+      }
+      // Scroll to end to show the latest messages
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
   };
 
   return (
@@ -164,6 +195,24 @@ export default function ChatPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {unreadTechnicianCount > 0 && (
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={handleBellClick}
+                  className="relative"
+                  data-testid="button-notifications"
+                >
+                  <Bell className="w-4 h-4" />
+                  <Badge 
+                    variant="destructive" 
+                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                    data-testid="badge-notification-count"
+                  >
+                    {unreadTechnicianCount}
+                  </Badge>
+                </Button>
+              )}
               <Button 
                 variant="outline" 
                 size="sm"

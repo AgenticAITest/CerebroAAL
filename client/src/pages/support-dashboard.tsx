@@ -4,6 +4,7 @@ import { Ticket, LogAnalysis, Message } from "@shared/schema";
 import { TicketCard } from "@/components/TicketCard";
 import { AALAnalysis } from "@/components/AALAnalysis";
 import { ChatMessage } from "@/components/ChatMessage";
+import { RequestInfoDialog } from "@/components/RequestInfoDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,7 @@ export default function SupportDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [showOnlyScriptedTickets, setShowOnlyScriptedTickets] = useState(true);
+  const [showRequestInfoDialog, setShowRequestInfoDialog] = useState(false);
   const { toast } = useToast();
   
   useWebSocket();
@@ -95,6 +97,7 @@ export default function SupportDashboard() {
       });
       if (selectedTicketId) {
         queryClient.invalidateQueries({ queryKey: [`/api/ticket-messages/${selectedTicketId}`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/tickets/${selectedTicketId}`] });
       }
     },
   });
@@ -126,7 +129,19 @@ export default function SupportDashboard() {
   });
 
   return (
-    <div className="flex h-screen bg-background">
+    <>
+      <RequestInfoDialog
+        open={showRequestInfoDialog}
+        onOpenChange={setShowRequestInfoDialog}
+        onSend={(message) => {
+          if (selectedTicketId) {
+            requestInfoMutation.mutate({ ticketId: selectedTicketId, message });
+          }
+        }}
+        isPending={requestInfoMutation.isPending}
+      />
+      
+      <div className="flex h-screen bg-background">
       <aside className="w-64 border-r border-border bg-sidebar">
         <div className="p-6 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
@@ -354,18 +369,11 @@ export default function SupportDashboard() {
                           {selectedTicket.status === 'new' && (
                             <Button 
                               className="w-full" 
-                              data-testid="button-request-sku-file"
-                              onClick={() => {
-                                if (selectedTicketId) {
-                                  requestInfoMutation.mutate({
-                                    ticketId: selectedTicketId,
-                                    message: "Hi, can you share your latest SKU export file so we can verify mappings?"
-                                  });
-                                }
-                              }}
+                              data-testid="button-request-info"
+                              onClick={() => setShowRequestInfoDialog(true)}
                               disabled={requestInfoMutation.isPending}
                             >
-                              {requestInfoMutation.isPending ? "Sending..." : "Request SKU Export File"}
+                              Request More Info
                             </Button>
                           )}
                           {selectedTicket.status !== 'new' && selectedTicket.status !== 'resolved' && (
@@ -446,5 +454,6 @@ export default function SupportDashboard() {
         </div>
       </div>
     </div>
+    </>
   );
 }

@@ -65,6 +65,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Missing content or file" });
       }
 
+      // Check if this is a response to an IT Support message (Scenario 7)
+      const messages = await storage.getMessages(conversationId);
+      const lastTechnicianMessage = messages.filter(m => m.role === 'technician').pop();
+      const isScenario7 = lastTechnicianMessage && lastTechnicianMessage.content.includes("share your latest SKU export file");
+
       // Store user message
       await storage.createMessage({
         conversationId,
@@ -72,6 +77,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
         content,
         ticketId: null,
       });
+
+      // Handle Scenario 7 automated flow
+      if (isScenario7 && (file || content.toLowerCase().includes("uploading"))) {
+        // User uploaded file in response to IT - trigger automated Scenario 7 flow
+        setTimeout(async () => {
+          // After 3 seconds, IT responds
+          await storage.createMessage({
+            conversationId,
+            role: "technician",
+            content: "[IT Support] Thanks — fix applied. Dashboard should update within 5 minutes.",
+            ticketId: null,
+          });
+
+          wss.clients.forEach((client) => {
+            if (client.readyState === WebSocket.OPEN) {
+              client.send(JSON.stringify({ type: "message_update", conversationId }));
+            }
+          });
+
+          // After 2 more seconds, Cerebro asks if resolved
+          setTimeout(async () => {
+            await storage.createMessage({
+              conversationId,
+              role: "cerebro",
+              content: "Is your issue resolved now?",
+              ticketId: null,
+            });
+
+            wss.clients.forEach((client) => {
+              if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify({ type: "message_update", conversationId }));
+              }
+            });
+          }, 2000);
+        }, 3000);
+
+        // Return immediately with just the user's message
+        const allMessages = await storage.getMessages(conversationId);
+        return res.json({ success: true, messages: allMessages });
+      }
+
+      // Handle Scenario 7 resolution
+      const lastCerebroMessage = messages.filter(m => m.role === 'cerebro').pop();
+      if (lastCerebroMessage && lastCerebroMessage.content.includes("Is your issue resolved now?") && 
+          (content.toLowerCase().includes("yes") || content.toLowerCase().includes("yeah"))) {
+        await storage.createMessage({
+          conversationId,
+          role: "cerebro",
+          content: "Great! Closing the ticket.",
+          ticketId: null,
+        });
+
+        // Close the ticket
+        const ticket = await storage.getTicketByConversationId(conversationId);
+        if (ticket) {
+          await storage.updateTicketStatus(ticket.id, "resolved");
+          broadcastTicketUpdate(ticket.id);
+        }
+
+        const allMessages = await storage.getMessages(conversationId);
+        return res.json({ success: true, messages: allMessages });
+      }
 
       console.log("Calling cerebroAI.processMessage");
       // Get AI response
@@ -363,14 +430,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Conversation not found for ticket" });
       }
 
+      // Add [IT Support] prefix to the message
       await storage.createMessage({
         conversationId,
         role: "technician",
-        content: message,
+        content: `[IT Support] ${message}`,
         ticketId: id,
       });
 
       await storage.updateTicketStatus(id, "in_progress");
+      
+      // Broadcast message update to notify user chat
+      wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({ type: "message_update", conversationId }));
+        }
+      });
       
       broadcastTicketUpdate(id);
       res.json({ success: true, message: "Request sent to user" });
